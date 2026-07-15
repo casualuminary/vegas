@@ -1,5 +1,5 @@
 require 'uri'
-require 'open-uri'
+require 'socket'
 require 'logger'
 require 'optparse'
 require 'fileutils'
@@ -144,8 +144,12 @@ module Vegas
     def port_open?(check_url = nil)
       begin
         check_url ||= url
-        options[:no_proxy] ? URI.open(check_url, :proxy => nil) : URI.open(check_url)
-        false
+        uri = URI.parse(check_url)
+
+        socket = TCPSocket.new(uri.host, uri.port)
+        socket.close
+
+        true
       rescue Errno::ECONNREFUSED, Errno::EPERM, Errno::ETIMEDOUT
         true
       end
